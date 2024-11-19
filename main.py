@@ -5,6 +5,7 @@ from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from shoot import Shot
 from game_over import Game_Over
+from shortcuts import shortcuts
 import sys
 
 def main():
@@ -29,6 +30,8 @@ def main():
     game_over = Game_Over() 
     text, text_rect = game_over.game_over()
 
+    shortcut = shortcuts()
+
     game_running = True
 
     while True:
@@ -37,6 +40,9 @@ def main():
                 return
     
         screen.fill(color=(0,0,0))
+        shortcut.update_keys()
+        score_text_2, score_text_rect_2 = game_over.game_score(player.score, game_running)
+        screen.blit(score_text_2, score_text_rect_2)
         if game_running == True:
             for update in updatable:
                 update.update(dt)
@@ -53,12 +59,15 @@ def main():
             for asteroid in asteroids:
                 if game_running == False:
                     asteroid.kill()
+            for shot in shots:
+                if game_running == False:
+                    shot.kill()
         else:
             screen.blit(text, text_rect)
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_r]:
-                game_running = True
-                player.reset()
+            score_text, score_text_rect = game_over.game_score(player.score, game_running)
+            screen.blit(score_text, score_text_rect)
+            game_running = shortcut.restart_game_shortcut(player)
+        shortcut.exit_game_shortcut()
         pygame.display.flip()
         dt = clock.tick(60) / 1000 #limit framrate to 60 FPS
 
